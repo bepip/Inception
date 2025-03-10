@@ -1,0 +1,20 @@
+services:
+  wordpress:
+    build: srcs/requirements/wordpress/
+    env_file: .env
+    container_name: wordpress
+    ports:
+    - "443"
+    restart: always
+  nginx:
+    build: srcs/requirements/nginx/
+    env_file: .env
+    container_name: nginx
+    ports:
+    - "443"
+    restart: always
+  mariadb:
+    container_name: mariadb
+    build: srcs/requirements/mariadb
+    env_file: .env
+    restart: always
