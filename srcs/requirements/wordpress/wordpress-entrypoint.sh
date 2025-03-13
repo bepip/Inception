@@ -60,8 +60,6 @@ EOF
     echo "wp-config.php created manually."
 else
     echo "wp-config.php already exists."
-    cat "$WP_CONFIG_PATH" | wc -l
-    cat "$WP_CONFIG_PATH"
 fi
 
 if ! wp core is-installed --path='/var/www/wordpress' --allow-root; then
