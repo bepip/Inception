@@ -1,4 +1,4 @@
-FROM debian:bullseye
+FROM debian:bullseye-slim
 RUN	apt-get update && apt-get upgrade -y && \
 	apt-get install -y \
 	openssl \
@@ -14,6 +14,6 @@ RUN openssl req -x509 -nodes -out /etc/nginx/ssl/inception.crt -keyout /etc/ngin
 RUN mkdir -p /var/run/nginx
 RUN chmod 755 /var/www/html
 RUN chown -R www-data:www-data /var/www/html
-COPY conf/nginx.conf /etc/nginx/nginx.conf
 CMD [ "nginx", "-g", "daemon off;" ]
-#EXPOSE 443
+COPY conf/nginx.conf /etc/nginx/nginx.conf
+EXPOSE 443

@@ -1,61 +1,5 @@
 #!/bin/sh
-set -e
-
-echo "Starting WordPress setup..."
-sleep 10
-
-# Check database connectivity
-if ! wp db check --path='/var/www/wordpress/' --allow-root; then
-    echo "Cannot connect to database. Please check your configuration."
-    exit 1
-fi
-
-# Create wp-config.php if it doesn't exist
-if [ ! -f "/var/www/wordpress/wp-config.php" ]; then
-    echo "Creating wp-config.php..."
-    if ! wp config create --allow-root \
-                          --dbname="$SQL_DATABASE" \
-                          --dbuser="$SQL_USER" \
-                          --dbpass="$SQL_PASSWORD" \
-                          --dbhost=mariadb:3306 \
-                          --path='/var/www/wordpress/'; then
-        echo "Failed to create wp-config.php"
-        exit 1
-    fi
-else
-    echo "wp-config.php already exists. Content:"
-    wc -l /var/www/wordpress/wp-config.php
-    cat /var/www/wordpress/wp-config.php
-fi
-
-# Install WordPress core if not already installed
-if ! wp core is-installed --path='/var/www/wordpress/' --allow-root; then
-    echo "Installing WordPress core..."
-    if ! wp core install --title="SummeryLeak" \
-                         --admin_user="$ADMIN_USER" \
-                         --admin_password="$ADMIN_PASSWORD" \
-                         --admin_email="$ADMIN_EMAIL" \
-                         --skip-email \
-                         --path='/var/www/wordpress/' \
-                         --allow-root; then
-        echo "Failed to install WordPress core"
-        exit 1
-    fi
-
-    echo "Creating additional user..."
-    if ! wp user create "$USER_LOGIN" "$USER_EMAIL" --path='/var/www/wordpress/' --allow-root; then
-        echo "Failed to create additional user"
-        exit 1
-    fi
-else
-    echo "WordPress is already installed."
-fi
-
-echo "WordPress setup completed successfully."
-exec php-fpm7.4 -F
-#
-##!/bin/sh
-##set -e
+#set -e
 #sleep 10
 #
 #if [ ! -f "/var/www/wordpress/wp-config.php" ]; then
@@ -64,21 +8,75 @@ exec php-fpm7.4 -F
 #						--dbuser=$SQL_USER \
 #						--dbpass=$SQL_PASSWORD \
 #						--dbhost=mariadb:3306 \
-#						--path='/var/www/wordpress/'
+#						--path='/var/www/wordpress'
 #else
-#	cat /var/www/wordpress/wp-config.php | wc -l
-#	cat /var/www/wordpress/wp-config.php
+#	cat /var/www/wordpress/wp-config.php/wp-config.php | wc -l
+#	cat /var/www/wordpress/wp-config.php/wp-config.php
 #fi
-#if ! wp core is-installed --path='/var/www/wordpress/' --allow-root; then
+#if ! wp core is-installed --path='/var/www/wordpress' --allow-root; then
 #	wp core install \
 #		--title="SummeryLeak" \
 #		--admin_user=$ADMIN_USER \
 #		--admin_password=$ADMIN_PASSWORD \
 #		--admin_email=$ADMIN_EMAIL \
 #		--skip-email \
-#		--path='/var/www/wordpress/' \
+#		--path='/var/www/wordpress' \
 #		--allow-root
-#	wp user create $USER_LOGIN $USER_EMAIL --path='/var/www/wordpress/' --allow-root
+#	wp user create $USER_LOGIN $USER_EMAIL --path='/var/www/wordpress' --allow-root
 #fi
 #echo "WordPress setup completed."
 #
+#exec /usr/sbin/php-fpm7.4 -F
+#
+#!/bin/sh
+set -e
+sleep 10
+
+WP_CONFIG_PATH="/var/www/wordpress/wp-config.php"
+
+if [ ! -f "$WP_CONFIG_PATH" ]; then
+    # Manually create wp-config.php
+    cat > "$WP_CONFIG_PATH" <<EOF
+<?php
+define( 'DB_NAME', '$SQL_DATABASE' );
+define( 'DB_USER', '$SQL_USER' );
+define( 'DB_PASSWORD', '$SQL_PASSWORD' );
+define( 'DB_HOST', 'mariadb:3306' );
+define( 'DB_CHARSET', 'utf8' );
+define( 'DB_COLLATE', '' );
+
+$(wp config shuffle-salts --allow-root)
+
+\$table_prefix = 'wp_';
+
+define( 'WP_DEBUG', false );
+
+if ( ! defined( 'ABSPATH' ) ) {
+    define( 'ABSPATH', __DIR__ . '/' );
+}
+
+require_once ABSPATH . 'wp-settings.php';
+EOF
+    echo "wp-config.php created manually."
+else
+    echo "wp-config.php already exists."
+    cat "$WP_CONFIG_PATH" | wc -l
+    cat "$WP_CONFIG_PATH"
+fi
+
+if ! wp core is-installed --path='/var/www/wordpress' --allow-root; then
+    wp core install \
+        --url="http://pibernar.42.fr" \
+        --title="SummeryLeak" \
+        --admin_user=$ADMIN_USER \
+        --admin_password=$ADMIN_PASSWORD \
+        --admin_email=$ADMIN_EMAIL \
+        --skip-email \
+        --path='/var/www/wordpress' \
+        --allow-root
+    wp user create $USER_LOGIN $USER_EMAIL --role=author --path='/var/www/wordpress' --allow-root
+fi
+
+echo "WordPress setup completed."
+
+exec /usr/sbin/php-fpm7.4 -F

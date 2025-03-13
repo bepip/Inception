@@ -9,14 +9,14 @@ user                    = mysql
 datadir                 = /var/lib/mysql
 socket			= /run/mysqld/mysqld.sock
 port			= 3306
-bind-address            = *
+bind-address=*
 # was here bu default idk if i should keep
-pid-file                = /run/mysqld/mysqld.pid
-basedir                 = /usr
-tmpdir                  = /tmp
-lc-messages-dir         = /usr/share/mysql
-lc-messages             = en_US
-skip-external-locking
+#pid-file                = /run/mysqld/mysqld.pid
+#basedir                 = /usr
+#tmpdir                  = /tmp
+#lc-messages-dir         = /usr/share/mysql
+#lc-messages             = en_US
+#skip-external-locking
 
 # Broken reverse DNS slows down connections considerably and name resolve is
 # safe to skip if there are no "host by domain name" access grants
