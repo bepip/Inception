@@ -21,6 +21,9 @@ $(DATA_MARIADB):
 $(DATA_WORDPRESS):
 	mkdir -p $(DATA_WORDPRESS)
 
+build: $(ENV)
+	$(DOCKER_COMPOSE) build
+
 stop: $(ENV)
 	$(DOCKER_COMPOSE) stop
 
@@ -39,6 +42,14 @@ fclean: clean
 	sudo rm -rf $(DATA_WORDPRESS) $(DATA_MARIADB)
 	rm -f srcs/$(ENV)
 
+safere: $(ENV) stop
+	$(DOCKER) volume rm srcs_mariadb
+	$(DOCKER) volume rm srcs_wordpress
+	@echo "Removing data directories..."
+	sudo rm -rf $(DATA_WORDPRESS) $(DATA_MARIADB)
+	$(DOCKER_COMPOSE) build
+	$(DOCKER_COMPOSE) up -d
+
 check:
 	@$(DOCKER) ps -a
 	@echo ""
@@ -48,7 +59,11 @@ check:
 	@echo ""
 	@$(DOCKER) network ls
 
-log:
+log: $(ENV)
 	$(DOCKER_COMPOSE) logs -f
+
+getUser: $(ENV)
+	@$(DOCKER_COMPOSE) logs wordpress | grep Password
+
 
 re: fclean all

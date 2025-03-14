@@ -15,8 +15,6 @@ define( 'DB_HOST', 'mariadb:3306' );
 define( 'DB_CHARSET', 'utf8' );
 define( 'DB_COLLATE', '' );
 
-$(wp config shuffle-salts --allow-root)
-
 \$table_prefix = 'wp_';
 
 define( 'WP_DEBUG', false );
