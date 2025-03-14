@@ -42,7 +42,7 @@ if ! wp core is-installed --path='/var/www/wordpress' --allow-root; then
         --skip-email \
         --path='/var/www/wordpress' \
         --allow-root
-    wp user create $USER_LOGIN $USER_EMAIL --role=author --path='/var/www/wordpress' --allow-root
+    wp user create $USER_LOGIN $USER_EMAIL --path='/var/www/wordpress' --allow-root
 fi
 
 echo "WordPress setup completed."
