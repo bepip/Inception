@@ -42,11 +42,16 @@ fclean: clean
 	sudo rm -rf $(DATA_WORDPRESS) $(DATA_MARIADB)
 	rm -f srcs/$(ENV)
 
-safere: $(ENV) stop
-	$(DOCKER) volume rm srcs_mariadb
-	$(DOCKER) volume rm srcs_wordpress
-	@echo "Removing data directories..."
+rmdata: $(DATA_MARIADB) $(DATA_WORDPRESS)
 	sudo rm -rf $(DATA_WORDPRESS) $(DATA_MARIADB)
+
+re2: $(ENV) stop rmdata
+	$(DOCKER) rm -f nginx wordpress mariadb
+	$(DOCKER) volume rm -f srcs_mariadb
+	$(DOCKER) volume rm -f srcs_wordpress
+	mkdir -p $(DATA_WORDPRESS)
+	mkdir -p $(DATA_MARIADB)
+	@echo "Removing data directories..."
 	$(DOCKER_COMPOSE) build
 	$(DOCKER_COMPOSE) up -d
 
@@ -63,7 +68,6 @@ log: $(ENV)
 	$(DOCKER_COMPOSE) logs -f
 
 getUser: $(ENV)
-	@$(DOCKER_COMPOSE) logs wordpress | grep Password
 
 
 re: fclean all
